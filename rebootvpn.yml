@@ -1,0 +1,17 @@
+
+---
+- hosts: all
+  gather_facts: no
+  user: pi
+  tasks:
+  - name: check vpn
+    command: curl --interface lo:1 www.google.se --max-time 15
+    ignore_errors: true
+    register: restart_needed
+
+
+  - name: restart openvpn
+    service: name=openvpn state=restarted
+    become: yes
+    become_method: sudo
+    when: restart_needed.stderr.find('expiration') != -1
